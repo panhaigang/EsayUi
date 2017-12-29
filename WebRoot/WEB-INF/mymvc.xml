@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+		">
+		
+		<!-- ==================springmvc.xml 配置控制层处理+视图层 ==============================-->
+		 
+		 <!-- 扫描cn包下的注解 -->
+		<context:component-scan base-package="cn">
+			<!-- 排除扫描事务逻辑层和持久层的注解 -->
+			<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+			<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+		</context:component-scan>
+		
+		<mvc:default-servlet-handler/>
+		
+		<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"></bean>
+		
+		<!-- 注解驱动 -->
+		<mvc:annotation-driven>
+			<!-- josn的消息转换器 -->
+			<mvc:message-converters>
+				<!-- 用于字節數組的消息轉換器 -->
+				<bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html</value>
+							<value>application/x-www-form-urlencoded</value>
+						</list>
+					</property>
+				</bean>
+				<!-- 用于對象消息轉換器 -->
+				<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+					<property name="supportedMediaTypes">
+						<list>
+							<value>text/html</value>
+							<value>application/x-www-form-urlencoded</value>
+						</list>
+					</property>
+				</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+</beans>

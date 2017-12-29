@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" 
+	xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+	http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+   <!-- 
+   		==========================================
+   			spring的配置
+   		==========================================
+    -->
+   <context-param>
+   	<param-name>contextConfigLocation</param-name>
+   	<param-value>classpath:spring.xml</param-value>
+   </context-param>
+   <listener>
+   	<!-- 
+   		加载spring.xml文件
+   	 -->
+   	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+   </listener>
+   
+   
+   
+   
+   
+   
+   <!-- 
+   		==============================================
+   			springmvc配置
+   		==============================================
+    -->
+   <!-- 
+   		设值乱码问题
+    -->
+   <filter>
+	  <filter-name>myFilter2</filter-name>
+	  <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+	  <init-param>
+	  <!-- 设request字符集 -->
+	  <param-name>encoding</param-name>
+	  <param-value>UTF-8</param-value>
+	  </init-param>
+	  <init-param>
+	  <!--设response字符集,跟随request -->
+	  <param-name>forceEncoding</param-name>
+	  <param-value>true</param-value>
+	  </init-param>
+  	</filter>
+	<filter-mapping>
+	  <filter-name>myFilter2</filter-name>
+	  <url-pattern>/*</url-pattern>
+  	</filter-mapping>
+   
+   <!-- 
+   		配置springmvc支持 restful风格url  四个动作  get post put delete
+   		put+delete  需要在form表单中  添加一个隐藏表单域  
+   					<input type='hidden' name="_method" value="delete">  
+    -->
+  <filter>
+	  <filter-name>myFilter</filter-name>
+	  <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+  </filter>
+  <filter-mapping>
+	  <filter-name>myFilter</filter-name>
+	  <url-pattern>/*</url-pattern>
+  </filter-mapping>
+   
+   
+   
+   <!-- spring mvc的核心配置器 -->
+    <servlet>
+		<servlet-name>mvc</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<!-- 可以指定扫描的spring.xml文件 -->
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>/WEB-INF/mymvc.xml</param-value>
+		</init-param>
+		<!-- 启动实例化 -->
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>mvc</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+  
+  
+  
+  
+  <!-- 启动druid的监控功能 -->
+   <servlet>
+		<servlet-name>mydruid</servlet-name>
+		<servlet-class>com.alibaba.druid.support.http.StatViewServlet</servlet-class>
+		<!-- 设值密码和账号 -->
+		<init-param>
+			<param-name>loginUsername</param-name>
+			<param-value>123456</param-value>
+		</init-param>
+		<init-param>
+			<param-name>loginPassword</param-name>
+			<param-value>123456</param-value>
+		</init-param>
+		<!-- 启动实例化 -->
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>mydruid</servlet-name>
+		<url-pattern>/druid/*</url-pattern>
+	</servlet-mapping>
+  
+  
+  
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+</web-app>

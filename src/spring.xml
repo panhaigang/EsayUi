@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" 
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd 
+		">
+		
+		<!-- ===========spring.xml 配置管理事务逻辑层+持久层 =====================-->
+		
+		<!-- 扫描cn包下的注解 -->
+		<context:component-scan base-package="cn">
+			<!-- 排除扫描控制层的注解 -->
+			<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		</context:component-scan>
+		
+		<!-- 
+			所有数据库操作的源都实现自DataSouce
+			DriverManagerDataSource(请求产生一个连接  用完关闭==效率慢     要来接重用  使用连接池)
+			连接池======c3p0  dbcp   druid(阿里的产品)
+		 -->
+		<context:property-placeholder location="classpath:mysql.properties"/>
+		<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+			<property name="url" value="${url}"></property>
+			<property name="driverClassName" value="${driverClass}"></property>
+			<property name="username" value="${username1}"></property>
+			<property name="password" value="${password}"></property>
+			<!-- 默认初始化连接个数 -->
+			<property name="initialSize" value="1"></property>
+			<!-- 连接数的最大值 -->
+			<property name="maxActive" value="200"></property>
+			<!-- 最大的等待的线程 -->
+			<property name="maxIdle" value="100"></property>
+			<!-- 开启sql语句的统计功能 -->
+			<property name="filters" value="stat"></property>
+		</bean>
+		
+		<!-- ======集成mybatis====== -->
+		
+		<!-- 配置产生session工厂 -->
+		<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+			<property name="dataSource" ref="dataSource"></property>
+		</bean>
+		<!-- 配置产生session -->
+		<bean id="sessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+			<constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+		</bean>
+		
+		<!-- 扫描mybatis的接口映射 -->
+		<bean id="scannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+			<property name="basePackage" value="cn.*..*.dao"></property>
+		</bean>
+		
+		
+	<!-- ======事务管理配置========== -->
+	<!-- 事务管理类 -->  
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+        <!-- 事务需要操作数据库     要把连接数据库的bean注入 -->  
+        <property name="dataSource" ref="dataSource"></property>  
+    </bean>
+    
+    <!-- 定义通知  通知的代码  spring已经实现 -->  
+    <!-- 上面的id名为 id="transactionManager" 下面的 transaction-manager="transactionManager"可以不写-->  
+    <tx:advice id="myAdvise" transaction-manager="transactionManager">  
+        <tx:attributes>  
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="Exception" />  
+            <tx:method name="save*" propagation="REQUIRED" rollback-for="Exception"/>  
+            <tx:method name="delete*" propagation="REQUIRED" rollback-for="Exception"/>  
+            <tx:method name="*" read-only="true"/>  
+        </tx:attributes>  
+    </tx:advice>  
+    
+	<!-- 定义切点 -->  
+    <aop:config>  
+                            <!-- 任意返回值   cn包下的任意多个包下的service包下的所有类、所有方法拦截 -->  
+     <aop:pointcut expression="execution(* cn.*..*.service.*.*(..))" id="myPoint"/>  
+        <!-- 把切点和通知绑定     <tx:advice> -->  
+        <aop:advisor advice-ref="myAdvise" pointcut-ref="myPoint"/>  
+    </aop:config>  	
+</beans>
